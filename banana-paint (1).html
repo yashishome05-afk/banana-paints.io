@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍌 BANANA PAINT</title>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Lilita+One&family=Titan+One&family=VT323&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   THEME TOKENS  — every theme overrides these
+   ══════════════════════════════════════════ */
+:root {
+  --bg:       #f5ead6;
+  --paper:    #efe0c0;
+  --bar:      #1a2e44;
+  --accent:   #e2a520;
+  --accent2:  #c0392b;
+  --text:     #f5ead6;
+  --shadow:   #2a1a0e;
+  --swatch-border: #2a1a0e;
+  --canvas-bg:#d4c4a8;
+  --canvas-bg2:#c8b89a;
+  --teal:     #2a9d8f;
+  --pink:     #e8738a;
+  --grid-line: rgba(180,150,100,0.15);
+}
+
+/* ── THEMES ── */
+[data-theme="banana"] {
+  --bg:#f5ead6; --paper:#efe0c0; --bar:#1a2e44; --accent:#e2a520; --accent2:#c0392b;
+  --text:#f5ead6; --shadow:#2a1a0e; --canvas-bg:#d4c4a8; --canvas-bg2:#c8b89a;
+  --grid-line:rgba(180,150,100,0.15);
+}
+[data-theme="dark"] {
+  --bg:#1a1a2e; --paper:#16213e; --bar:#0f0e17; --accent:#e94560; --accent2:#f5a623;
+  --text:#eaeaea; --shadow:#000000; --canvas-bg:#2a2a3e; --canvas-bg2:#222236;
+  --grid-line:rgba(255,255,255,0.04);
+}
+[data-theme="cool"] {
+  --bg:#dbeeff; --paper:#c5dcf5; --bar:#1b3a6b; --accent:#48cae4; --accent2:#0096c7;
+  --text:#e0f4ff; --shadow:#0d1f3c; --canvas-bg:#b8d8f0; --canvas-bg2:#a8c8e0;
+  --grid-line:rgba(0,100,180,0.08);
+}
+[data-theme="warm"] {
+  --bg:#fff3e0; --paper:#ffe0b2; --bar:#6d2b00; --accent:#ff6d00; --accent2:#e65100;
+  --text:#fff8f0; --shadow:#3e1200; --canvas-bg:#ffd180; --canvas-bg2:#ffca56;
+  --grid-line:rgba(180,80,0,0.1);
+}
+[data-theme="sepia"] {
+  --bg:#f4e8d0; --paper:#e8d5b5; --bar:#4a3728; --accent:#c8873a; --accent2:#8b5e3c;
+  --text:#f8eed8; --shadow:#1a0e06; --canvas-bg:#ddc9a8; --canvas-bg2:#cebb96;
+  --grid-line:rgba(100,60,20,0.12);
+}
+[data-theme="mint"] {
+  --bg:#e8f8f2; --paper:#d0f0e4; --bar:#1b4d3e; --accent:#2ecc71; --accent2:#1abc9c;
+  --text:#e0fff2; --shadow:#0d2b20; --canvas-bg:#b8e8d0; --canvas-bg2:#a8d8c0;
+  --grid-line:rgba(0,120,70,0.08);
+}
+[data-theme="night"] {
+  --bg:#0d0d0d; --paper:#111118; --bar:#070710; --accent:#7c3aed; --accent2:#a855f7;
+  --text:#e8d5ff; --shadow:#000; --canvas-bg:#18181f; --canvas-bg2:#141418;
+  --grid-line:rgba(120,50,220,0.07);
+}
+[data-theme="rose"] {
+  --bg:#fdf0f3; --paper:#fad7df; --bar:#7a1535; --accent:#e05176; --accent2:#c0305a;
+  --text:#ffeef2; --shadow:#3a0015; --canvas-bg:#f5c0cc; --canvas-bg2:#ebb0be;
+  --grid-line:rgba(180,30,60,0.08);
+}
+[data-theme="retro-green"] {
+  --bg:#0d1f0d; --paper:#0a1a0a; --bar:#030f03; --accent:#39ff14; --accent2:#00cc00;
+  --text:#c8ffb0; --shadow:#000; --canvas-bg:#0f1f0f; --canvas-bg2:#0b180b;
+  --grid-line:rgba(57,255,20,0.06);
+}
+[data-theme="sunset"] {
+  --bg:#2d0a00; --paper:#3d1200; --bar:#1a0500; --accent:#ff6b35; --accent2:#f7c59f;
+  --text:#ffe5d0; --shadow:#000; --canvas-bg:#3a1000; --canvas-bg2:#2e0d00;
+  --grid-line:rgba(255,100,40,0.08);
+}
+[data-theme="bubblegum"] {
+  --bg:#fff0f6; --paper:#ffd6eb; --bar:#7b0d4e; --accent:#ff6bae; --accent2:#ff3d8e;
+  --text:#fff0f9; --shadow:#3a0020; --canvas-bg:#ffb8d9; --canvas-bg2:#ffa8cc;
+  --grid-line:rgba(200,0,100,0.07);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'VT323', monospace;
+  overflow: hidden;
+  height: 100vh; width: 100vw;
+  display: flex; flex-direction: column;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 39px, var(--grid-line) 39px, var(--grid-line) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, var(--grid-line) 39px, var(--grid-line) 40px);
+  transition: background 0.35s, background-image 0.35s;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.022) 2px, rgba(0,0,0,0.022) 4px);
+  pointer-events: none; z-index: 9999;
+}
+
+/* ══ TOP BAR ══ */
+#topbar {
+  background: var(--bar);
+  border-bottom: 3px solid var(--shadow);
+  padding: 0 6px;
+  display: flex; align-items: stretch;
+  height: 36px; flex-shrink: 0;
+  box-shadow: 0 3px 0 var(--shadow);
+  gap: 1px;
+  transition: background 0.3s;
+}
+
+#logo {
+  font-family: 'Lilita One', cursive;
+  font-size: 19px;
+  color: var(--accent);
+  padding: 0 14px;
+  display: flex; align-items: center; gap: 5px;
+  letter-spacing: 1px;
+  text-shadow: 3px 3px 0 var(--shadow), -1px -1px 0 rgba(255,255,255,0.15);
+  border-right: 2px solid rgba(255,255,255,0.1);
+  margin-right: 4px;
+  animation: logobob 2.5s ease-in-out infinite;
+  white-space: nowrap;
+  position: relative;
+}
+#logo .logo-banana {
+  display: inline-block;
+  animation: bananaspin 3s ease-in-out infinite;
+  font-size: 20px;
+  filter: drop-shadow(1px 1px 0 var(--shadow));
+}
+#logo .logo-text-banana {
+  color: var(--accent);
+  font-style: italic;
+  -webkit-text-stroke: 1px var(--shadow);
+}
+#logo .logo-text-paint {
+  color: #fff;
+  font-style: normal;
+  -webkit-text-stroke: 1px var(--shadow);
+  margin-left: 3px;
+}
+@keyframes bananaspin {
+  0%,100% { transform: rotate(-8deg) scale(1); }
+  30%      { transform: rotate(12deg) scale(1.15); }
+  60%      { transform: rotate(-5deg) scale(0.95); }
+}
+@keyframes logobob {
+  0%,100% { transform: translateY(0) rotate(-1deg) skewX(-2deg); }
+  50%      { transform: translateY(-3px) rotate(1.5deg) skewX(2deg); }
+}
+
+.menu-item {
+  color: var(--text);
+  font-family: 'Boogaloo', cursive;
+  font-size: 17px; padding: 0 9px;
+  cursor: pointer;
+  display: flex; align-items: center;
+  letter-spacing: 1.5px;
+  transition: background 0.05s, transform 0.08s; user-select: none; white-space: nowrap;
+}
+.menu-item:hover { background: var(--accent2); transform: skewX(-4deg); }
+
+/* ── SAVE BTN ── */
+#save-btn {
+  margin-left: auto; margin-right: 4px; align-self: center;
+  background: var(--accent); color: var(--shadow);
+  border: 2px solid var(--shadow);
+  font-family: 'Boogaloo', cursive; font-size: 13px;
+  padding: 5px 10px; cursor: pointer;
+  box-shadow: 3px 3px 0 var(--shadow); letter-spacing: 1px;
+  transition: background 0.1s, transform 0.05s, box-shadow 0.05s;
+  display: flex; align-items: center; gap: 5px;
+  position: relative; overflow: hidden; flex-shrink: 0;
+}
+#save-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(255,255,255,0.1) 3px, rgba(255,255,255,0.1) 6px);
+}
+#save-btn:hover { filter: brightness(1.1); transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--shadow); }
+#save-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--shadow); }
+#save-btn .save-icon { font-size: 14px; }
+@keyframes savePop {
+  0%   { transform: translate(-1px,-1px) scale(1); }
+  35%  { transform: translate(-1px,-1px) scale(1.13); background: var(--teal); color: #fff; }
+  100% { transform: translate(-1px,-1px) scale(1); }
+}
+#save-btn.flash { animation: savePop 0.45s ease; }
+
+/* ══ TOOLBAR ══ */
+#toolbar {
+  background: var(--paper);
+  border-bottom: 3px solid var(--shadow);
+  padding: 3px 6px;
+  display: flex; align-items: center; gap: 5px;
+  flex-wrap: nowrap; overflow-x: auto; flex-shrink: 0;
+  box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+  transition: background 0.3s;
+}
+#toolbar::-webkit-scrollbar { height: 4px; }
+#toolbar::-webkit-scrollbar-thumb { background: var(--bar); }
+
+.tool-group {
+  display: flex; align-items: center; gap: 2px;
+  border: 2px solid var(--shadow);
+  background: var(--bg);
+  padding: 2px 3px; border-radius: 3px;
+  box-shadow: 2px 2px 0 var(--shadow); flex-shrink: 0;
+  transition: background 0.3s;
+}
+.tool-btn {
+  width: 30px; height: 30px;
+  border: 2px solid transparent; background: none;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; border-radius: 3px; transition: all 0.05s;
+  position: relative; flex-shrink: 0; color: var(--shadow);
+}
+.tool-btn:hover { background: var(--accent); border-color: var(--shadow); transform: translate(-1px,-1px); box-shadow: 2px 2px 0 var(--shadow); }
+.tool-btn.active { background: var(--accent2); border-color: var(--shadow); color: #fff; box-shadow: inset 1px 1px 0 rgba(0,0,0,0.3); transform: translate(1px,1px); }
+.tool-btn[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute; top: 110%; left: 50%; transform: translateX(-50%);
+  background: var(--bar); color: var(--text);
+  padding: 2px 7px; font-size: 12px; white-space: nowrap;
+  border: 1px solid var(--shadow); z-index: 100; pointer-events: none;
+}
+.sep { width: 2px; height: 24px; background: var(--shadow); opacity: 0.25; margin: 0 1px; flex-shrink: 0; }
+.lbl { font-size: 12px; color: var(--shadow); opacity: 0.65; flex-shrink: 0; }
+
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  height: 8px; border: 2px solid var(--shadow); border-radius: 2px; outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 18px;
+  border: 2px solid var(--shadow); cursor: pointer; border-radius: 2px;
+}
+#size-slider { width: 70px; background: var(--bar); }
+#size-slider::-webkit-slider-thumb { background: var(--accent); box-shadow: 2px 2px 0 var(--shadow); }
+#opacity-slider { width: 55px; background: linear-gradient(to right,rgba(255,255,255,0.3),var(--bar)); }
+#opacity-slider::-webkit-slider-thumb { background: var(--pink); }
+#wiggle-slider { width: 55px; background: var(--teal); }
+#wiggle-slider::-webkit-slider-thumb { background: #fff; }
+#size-display { font-size: 15px; color: var(--shadow); min-width: 24px; text-align: center; }
+
+/* PALETTE */
+.color-swatch {
+  width: 20px; height: 20px;
+  border: 2px solid var(--shadow); cursor: pointer; border-radius: 2px;
+  transition: transform 0.06s; box-shadow: 2px 2px 0 var(--shadow); flex-shrink: 0;
+}
+.color-swatch:hover { transform: scale(1.25) translate(-1px,-1px); z-index: 2; }
+.color-swatch.active { border-color: #fff; box-shadow: 0 0 0 2px var(--shadow); transform: scale(1.1); }
+#fg-color { width: 24px; height: 24px; border: 2px solid var(--shadow); box-shadow: 2px 2px 0 var(--shadow); cursor: pointer; border-radius: 2px; flex-shrink: 0; }
+#bg-color-box { width: 18px; height: 18px; border: 2px solid var(--shadow); cursor: pointer; border-radius: 2px; margin-left: 5px; margin-top: -12px; flex-shrink: 0; }
+
+/* ══ CANVAS AREA ══ */
+#canvas-wrapper { flex: 1; display: flex; overflow: hidden; position: relative; }
+#canvas-scroll {
+  flex: 1; overflow: auto;
+  display: flex; align-items: center; justify-content: center;
+  background: repeating-conic-gradient(var(--canvas-bg2) 0% 25%, var(--canvas-bg) 0% 50%) 0 0 / 20px 20px;
+  padding: 24px;
+  transition: background 0.3s;
+}
+#canvas-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+#canvas-scroll::-webkit-scrollbar-thumb { background: var(--bar); border: 2px solid var(--shadow); }
+
+#canvas-jiggle { position: relative; will-change: transform; }
+#canvas-container {
+  position: relative;
+  box-shadow: 6px 6px 0 var(--shadow), 9px 9px 0 rgba(0,0,0,0.18);
+  border: 3px solid var(--shadow);
+}
+#main-canvas { display: block; cursor: crosshair; }
+#overlay-canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
+
+/* CURSOR */
+#cursor-preview {
+  position: fixed; pointer-events: none; border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.5);
+  transform: translate(-50%,-50%); z-index: 9998; display: none;
+}
+
+/* ══ STATUS BAR ══ */
+#statusbar {
+  background: var(--bar);
+  border-top: 3px solid var(--shadow);
+  padding: 2px 10px; display: flex; align-items: center; gap: 14px;
+  flex-shrink: 0; color: var(--text); font-size: 14px;
+  box-shadow: 0 -2px 0 var(--shadow);
+  transition: background 0.3s;
+}
+#pos-display { color: var(--accent); font-size: 15px; }
+.retro-tag { font-family: 'Boogaloo', cursive; font-size: 13px; color: var(--accent); opacity: 0.5; margin-left: auto; letter-spacing: 1px; }
+
+/* ══ POPUPS ══ */
+.popup {
+  position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  background: var(--bg); border: 3px solid var(--shadow);
+  box-shadow: 6px 6px 0 var(--shadow); padding: 14px;
+  z-index: 1000; display: none; min-width: 200px; font-size: 17px; color: var(--shadow);
+  transition: background 0.3s;
+}
+.popup-title { font-family: 'Titan One', cursive; font-size: 15px; margin-bottom: 10px; color: var(--accent2); text-shadow: 2px 2px 0 var(--shadow); letter-spacing: 1px; }
+.popup-btn { background: var(--bar); color: var(--text); border: 2px solid var(--shadow); padding: 5px 12px; cursor: pointer; font-family: 'VT323', monospace; font-size: 17px; margin-top: 8px; box-shadow: 2px 2px 0 var(--shadow); }
+.popup-btn:hover { background: var(--accent2); }
+.popup-btn:active { transform: translate(2px,2px); box-shadow: none; }
+.popup-close { position: absolute; top: 5px; right: 7px; cursor: pointer; font-size: 18px; }
+.popup-close:hover { color: var(--accent2); }
+.p-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.p-row input, .p-row select {
+  background: var(--paper); border: 2px solid var(--shadow);
+  padding: 3px 6px; font-family: 'VT323', monospace; font-size: 17px;
+  width: 80px; color: var(--shadow);
+}
+
+/* SAVE POPUP */
+#save-popup { min-width: 270px; }
+.fmt-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--paper); border: 2px solid var(--shadow);
+  padding: 7px 12px; cursor: pointer; margin: 4px 0;
+  font-family: 'VT323', monospace; font-size: 19px; color: var(--shadow);
+  box-shadow: 2px 2px 0 var(--shadow); width: 100%;
+}
+.fmt-btn:hover { background: var(--accent); transform: translate(-1px,-1px); box-shadow: 3px 3px 0 var(--shadow); }
+.fmt-btn:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--shadow); }
+.fmt-desc { font-size: 13px; opacity: 0.55; margin-left: auto; }
+#save-filename-row { margin-top: 10px; border-top: 2px solid var(--shadow); padding-top: 8px; }
+#save-filename-row label { font-size: 13px; opacity: 0.65; display: block; margin-bottom: 4px; }
+#save-filename-wrap { display: flex; gap: 6px; align-items: center; }
+#save-filename { width: 155px; background: var(--paper); border: 2px solid var(--shadow); padding: 3px 6px; font-family: 'VT323', monospace; font-size: 16px; color: var(--shadow); }
+#save-ext { font-size: 14px; opacity: 0.6; }
+
+/* ══ THEME POPUP ══ */
+#theme-popup { min-width: 320px; max-width: 360px; }
+#theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-bottom: 4px;
+}
+.theme-card {
+  cursor: pointer;
+  border: 3px solid var(--shadow);
+  box-shadow: 3px 3px 0 var(--shadow);
+  border-radius: 3px;
+  overflow: hidden;
+  transition: transform 0.07s, box-shadow 0.07s;
+  position: relative;
+}
+.theme-card:hover { transform: translate(-2px,-2px); box-shadow: 5px 5px 0 var(--shadow); }
+.theme-card:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--shadow); }
+.theme-card.active-theme { border-color: #fff; outline: 3px solid var(--accent2); }
+.theme-preview {
+  height: 48px;
+  display: flex; flex-direction: column;
+}
+.tp-bar { height: 14px; flex-shrink: 0; }
+.tp-toolbar { height: 10px; flex-shrink: 0; }
+.tp-canvas { flex: 1; }
+.theme-label {
+  font-family: 'Boogaloo', cursive;
+  font-size: 11px;
+  padding: 4px 6px;
+  background: var(--bg);
+  color: var(--shadow);
+  letter-spacing: 0.5px;
+  border-top: 2px solid var(--shadow);
+}
+.theme-card.active-theme .theme-label { background: var(--accent2); color: #fff; }
+.tick {
+  position: absolute; top: 3px; right: 4px;
+  font-size: 13px; display: none;
+}
+.theme-card.active-theme .tick { display: block; }
+
+/* STAMPS */
+#stamp-grid { display: flex; flex-wrap: wrap; gap: 5px; max-width: 240px; margin-bottom: 6px; }
+#stamp-grid button { font-size: 22px; background: var(--paper); border: 2px solid var(--shadow); cursor: pointer; padding: 2px 4px; border-radius: 3px; box-shadow: 2px 2px 0 var(--shadow); }
+#stamp-grid button:hover { background: var(--accent); transform: scale(1.15); }
+
+/* TOAST */
+#dl-toast {
+  position: fixed; bottom: 50px; left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--teal); color: #fff;
+  border: 2px solid var(--shadow); box-shadow: 3px 3px 0 var(--shadow);
+  padding: 7px 18px; font-size: 18px;
+  opacity: 0; pointer-events: none; z-index: 9999;
+  transition: opacity 0.25s, transform 0.25s;
+}
+#dl-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+#color-picker-input { position: absolute; opacity: 0; width: 0; height: 0; }
+</style>
+</head>
+<body data-theme="banana">
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div id="logo"><span class="logo-banana">🍌</span><span class="logo-text-banana">BANANA</span><span class="logo-text-paint">PAINT</span></div>
+  <div class="menu-item" onclick="showNew()">FILE</div>
+  <div class="menu-item" onclick="clearCanvas()">CLEAR</div>
+  <div class="menu-item" onclick="flipH()">FLIP↔</div>
+  <div class="menu-item" onclick="flipV()">FLIP↕</div>
+  <div class="menu-item" onclick="document.getElementById('stamp-popup').style.display='block'">STAMPS</div>
+  <div class="menu-item" id="wiggle-toggle-btn" onclick="toggleWiggleMode()">WIGGLE:ON</div>
+  <div class="menu-item" onclick="document.getElementById('theme-popup').style.display='block'" style="color:var(--accent);">🎨 THEME</div>
+
+  <button id="save-btn" onclick="openSavePopup()">
+    <span class="save-icon">💾</span> SAVE &amp; DOWNLOAD
+  </button>
+</div>
+
+<!-- TOOLBAR -->
+<div id="toolbar">
+  <div style="position:relative;margin-right:4px;flex-shrink:0;">
+    <div id="fg-color" title="Foreground" onclick="openColorPicker('fg')"></div>
+    <div id="bg-color-box" title="Background" onclick="openColorPicker('bg')"></div>
+  </div>
+
+  <div class="tool-group" id="palette-row" style="gap:2px;padding:2px;"></div>
+  <div class="sep"></div>
+
+  <div class="tool-group">
+    <button class="tool-btn active" id="btn-pencil"  data-tip="Pencil [P]"  onclick="setTool('pencil',this)">✏️</button>
+    <button class="tool-btn"        id="btn-brush"   data-tip="Brush [B]"   onclick="setTool('brush',this)">🖌️</button>
+    <button class="tool-btn"        id="btn-wiggle"  data-tip="Wiggle [W]"  onclick="setTool('wiggle',this)">〰️</button>
+    <button class="tool-btn"        id="btn-spray"   data-tip="Spray [S]"   onclick="setTool('spray',this)">🫧</button>
+    <button class="tool-btn"        id="btn-eraser"  data-tip="Eraser [E]"  onclick="setTool('eraser',this)">🧹</button>
+    <button class="tool-btn"        id="btn-fill"    data-tip="Fill [F]"    onclick="setTool('fill',this)">🪣</button>
+    <button class="tool-btn"        id="btn-eyedrop" data-tip="Eyedrop [D]" onclick="setTool('eyedrop',this)">🔬</button>
+    <button class="tool-btn"        id="btn-line"    data-tip="Line [L]"    onclick="setTool('line',this)"   style="font-size:14px;">╱</button>
+    <button class="tool-btn"        id="btn-rect"    data-tip="Rect [R]"    onclick="setTool('rect',this)"   style="font-size:14px;">▭</button>
+    <button class="tool-btn"        id="btn-circle"  data-tip="Circle [C]"  onclick="setTool('circle',this)" style="font-size:14px;">◯</button>
+    <button class="tool-btn"        id="btn-stamp"   data-tip="Stamp"       onclick="setTool('stamp',this)">⭐</button>
+  </div>
+
+  <div class="sep"></div>
+  <div class="tool-group">
+    <span class="lbl">SIZE</span>
+    <input type="range" id="size-slider" min="1" max="80" value="10" oninput="updateSize(this.value)">
+    <span id="size-display">10</span>
+  </div>
+  <div class="tool-group">
+    <span class="lbl">FADE</span>
+    <input type="range" id="opacity-slider" min="10" max="100" value="100" oninput="brushOpacity=this.value/100">
+  </div>
+  <div class="tool-group">
+    <span class="lbl">〰</span>
+    <input type="range" id="wiggle-slider" min="0" max="30" value="8">
+  </div>
+  <div class="sep"></div>
+  <div class="tool-group">
+    <button class="tool-btn" data-tip="Undo [Ctrl+Z]" onclick="undo()">↩</button>
+    <button class="tool-btn" data-tip="Redo [Ctrl+Y]" onclick="redo()">↪</button>
+  </div>
+</div>
+
+<!-- CANVAS -->
+<div id="canvas-wrapper">
+  <div id="canvas-scroll">
+    <div id="canvas-jiggle">
+      <div id="canvas-container">
+        <canvas id="main-canvas" width="800" height="520"></canvas>
+        <canvas id="overlay-canvas" width="800" height="520"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <span id="pos-display">x:— y:—</span>
+  <span id="tool-display">TOOL: PENCIL</span>
+  <span id="color-display">COLOR: #1A2E44</span>
+  <span id="canvas-size-display">800 × 520</span>
+  <span class="retro-tag">🍌 BANANA PAINT v2.0 ✦ RETRO EDITION</span>
+</div>
+
+<div id="cursor-preview"></div>
+<input type="color" id="color-picker-input" onchange="applyPickedColor()">
+<div id="dl-toast">✓ SAVED!</div>
+
+<!-- NEW CANVAS POPUP -->
+<div class="popup" id="new-popup">
+  <div class="popup-close" onclick="closePopup('new-popup')">✕</div>
+  <div class="popup-title">✦ NEW CANVAS ✦</div>
+  <div class="p-row"><span>WIDTH:</span><input type="number" id="new-w" value="800" min="100" max="3000"></div>
+  <div class="p-row"><span>HEIGHT:</span><input type="number" id="new-h" value="520" min="100" max="3000"></div>
+  <div class="p-row"><span>BG:</span>
+    <select id="new-bg">
+      <option value="white">White</option>
+      <option value="#f5ead6">Parchment</option>
+      <option value="black">Black</option>
+      <option value="#1a2e44">Navy</option>
+    </select>
+  </div>
+  <button class="popup-btn" onclick="createNewCanvas()">CREATE ✓</button>
+</div>
+
+<!-- SAVE POPUP -->
+<div class="popup" id="save-popup">
+  <div class="popup-close" onclick="closePopup('save-popup')">✕</div>
+  <div class="popup-title">💾 SAVE YOUR PAINTING</div>
+  <button class="fmt-btn" onclick="doSave('png')"><span>🖼️</span> PNG — Lossless <span class="fmt-desc">Best quality</span></button>
+  <button class="fmt-btn" onclick="doSave('jpeg')"><span>📷</span> JPG — Compressed <span class="fmt-desc">Smaller file</span></button>
+  <button class="fmt-btn" onclick="doSave('webp')"><span>🌐</span> WEBP — Modern <span class="fmt-desc">Smallest</span></button>
+  <button class="fmt-btn" onclick="copyToClipboard()"><span>📋</span> Copy to Clipboard <span class="fmt-desc">Paste anywhere</span></button>
+  <div id="save-filename-row">
+    <label>FILENAME:</label>
+    <div id="save-filename-wrap">
+      <input type="text" id="save-filename" value="banana-paint">
+      <span id="save-ext">.png</span>
+    </div>
+  </div>
+</div>
+
+<!-- THEME POPUP -->
+<div class="popup" id="theme-popup" style="min-width:340px;">
+  <div class="popup-close" onclick="closePopup('theme-popup')">✕</div>
+  <div class="popup-title">🎨 CHOOSE YOUR THEME</div>
+  <div id="theme-grid"></div>
+</div>
+
+<!-- STAMPS POPUP -->
+<div class="popup" id="stamp-popup">
+  <div class="popup-close" onclick="closePopup('stamp-popup')">✕</div>
+  <div class="popup-title">✦ STAMPS ✦</div>
+  <div id="stamp-grid"></div>
+  <div style="font-size:13px;color:var(--shadow);opacity:0.6;margin-top:4px;">Pick a stamp, then click on canvas!</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  THEMES DEFINITION
+// ═══════════════════════════════════════════════════
+const THEMES = [
+  {
+    id: 'banana', name: 'BANANA', emoji: '🍌',
+    bar: '#1a2e44', toolbar: '#efe0c0', canvas1: '#d4c4a8', canvas2: '#c8b89a',
+    accent: '#e2a520', accent2: '#c0392b', bg: '#f5ead6'
+  },
+  {
+    id: 'dark', name: 'DARK', emoji: '🌑',
+    bar: '#0f0e17', toolbar: '#16213e', canvas1: '#2a2a3e', canvas2: '#222236',
+    accent: '#e94560', accent2: '#f5a623', bg: '#1a1a2e'
+  },
+  {
+    id: 'cool', name: 'COOL ICE', emoji: '❄️',
+    bar: '#1b3a6b', toolbar: '#c5dcf5', canvas1: '#b8d8f0', canvas2: '#a8c8e0',
+    accent: '#48cae4', accent2: '#0096c7', bg: '#dbeeff'
+  },
+  {
+    id: 'warm', name: 'WARM SUN', emoji: '☀️',
+    bar: '#6d2b00', toolbar: '#ffe0b2', canvas1: '#ffd180', canvas2: '#ffca56',
+    accent: '#ff6d00', accent2: '#e65100', bg: '#fff3e0'
+  },
+  {
+    id: 'sepia', name: 'SEPIA', emoji: '📜',
+    bar: '#4a3728', toolbar: '#e8d5b5', canvas1: '#ddc9a8', canvas2: '#cebb96',
+    accent: '#c8873a', accent2: '#8b5e3c', bg: '#f4e8d0'
+  },
+  {
+    id: 'mint', name: 'MINT', emoji: '🌿',
+    bar: '#1b4d3e', toolbar: '#d0f0e4', canvas1: '#b8e8d0', canvas2: '#a8d8c0',
+    accent: '#2ecc71', accent2: '#1abc9c', bg: '#e8f8f2'
+  },
+  {
+    id: 'night', name: 'NIGHT', emoji: '🔮',
+    bar: '#070710', toolbar: '#111118', canvas1: '#18181f', canvas2: '#141418',
+    accent: '#7c3aed', accent2: '#a855f7', bg: '#0d0d0d'
+  },
+  {
+    id: 'rose', name: 'ROSE', emoji: '🌹',
+    bar: '#7a1535', toolbar: '#fad7df', canvas1: '#f5c0cc', canvas2: '#ebb0be',
+    accent: '#e05176', accent2: '#c0305a', bg: '#fdf0f3'
+  },
+  {
+    id: 'retro-green', name: 'MATRIX', emoji: '💾',
+    bar: '#030f03', toolbar: '#0a1a0a', canvas1: '#0f1f0f', canvas2: '#0b180b',
+    accent: '#39ff14', accent2: '#00cc00', bg: '#0d1f0d'
+  },
+  {
+    id: 'sunset', name: 'SUNSET', emoji: '🌅',
+    bar: '#1a0500', toolbar: '#3d1200', canvas1: '#3a1000', canvas2: '#2e0d00',
+    accent: '#ff6b35', accent2: '#f7c59f', bg: '#2d0a00'
+  },
+  {
+    id: 'bubblegum', name: 'BUBBLEGUM', emoji: '🍭',
+    bar: '#7b0d4e', toolbar: '#ffd6eb', canvas1: '#ffb8d9', canvas2: '#ffa8cc',
+    accent: '#ff6bae', accent2: '#ff3d8e', bg: '#fff0f6'
+  },
+];
+
+let currentTheme = 'banana';
+
+function buildThemeGrid() {
+  const grid = document.getElementById('theme-grid');
+  grid.innerHTML = '';
+  THEMES.forEach(th => {
+    const card = document.createElement('div');
+    card.className = 'theme-card' + (th.id === currentTheme ? ' active-theme' : '');
+    card.onclick = () => applyTheme(th.id);
+    card.innerHTML = `
+      <div class="theme-preview">
+        <div class="tp-bar" style="background:${th.bar};"></div>
+        <div class="tp-toolbar" style="background:${th.toolbar};border-top:1px solid rgba(0,0,0,0.3);"></div>
+        <div class="tp-canvas" style="background:repeating-conic-gradient(${th.canvas2} 0% 25%,${th.canvas1} 0% 50%) 0 0 / 10px 10px;"></div>
+      </div>
+      <div class="theme-label" style="background:${th.toolbar};color:${th.bar};">
+        ${th.emoji} ${th.name}
+        <span class="tick">✓</span>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function applyTheme(id) {
+  document.body.setAttribute('data-theme', id);
+  currentTheme = id;
+  // refresh grid active states
+  document.querySelectorAll('.theme-card').forEach((c, i) => {
+    c.classList.toggle('active-theme', THEMES[i].id === id);
+  });
+  showToast('🎨 THEME: ' + THEMES.find(t=>t.id===id).name);
+}
+
+// ═══════════════════════════════════════════════════
+//  CORE STATE
+// ═══════════════════════════════════════════════════
+const canvas  = document.getElementById('main-canvas');
+const ctx     = canvas.getContext('2d');
+const overlay = document.getElementById('overlay-canvas');
+const octx    = overlay.getContext('2d');
+const jiggle  = document.getElementById('canvas-jiggle');
+
+let tool = 'pencil', brushSize = 10, brushOpacity = 1.0;
+let fgColor = '#1a2e44', bgColor = '#ffffff';
+let isDrawing = false, lastX = 0, lastY = 0;
+let undoStack = [], redoStack = [];
+let shapeStart = null;
+let colorPickerTarget = 'fg';
+let stampIndex = 0;
+let wigglePhase = 0;
+let sprayInterval = null;
+let wiggleEnabled = true;
+let wiggleRafId = null;
+
+const PALETTE = [
+  '#1a2e44','#c0392b','#e2a520','#2a9d8f','#e8738a','#7b4f9e',
+  '#6a7c3a','#f5ead6','#ffffff','#000000','#e67e22','#3498db',
+  '#2ecc71','#e74c3c','#9b59b6','#1abc9c','#f39c12','#d35400',
+  '#27ae60','#2980b9','#8e44ad','#16a085','#c0392b','#95a5a6'
+];
+const STAMPS = ['⭐','❤️','🌟','☁️','🌈','🌸','🦋','🐸','🔥','💎','🌙','☀️','🍄','🎈','🎨','✨','🦄','🌺','💀','🎭','🌻','🍀','🎪','🫀','🍌'];
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+function init() {
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const row = document.getElementById('palette-row');
+  PALETTE.forEach((c, i) => {
+    const s = document.createElement('div');
+    s.className = 'color-swatch' + (i === 0 ? ' active' : '');
+    s.style.background = c;
+    s.title = c;
+    s.onclick = () => pickPaletteColor(c, s);
+    row.appendChild(s);
+  });
+
+  const grid = document.getElementById('stamp-grid');
+  STAMPS.forEach((st, i) => {
+    const b = document.createElement('button');
+    b.textContent = st;
+    b.onclick = () => { stampIndex = i; closePopup('stamp-popup'); setTool('stamp', document.getElementById('btn-stamp')); };
+    grid.appendChild(b);
+  });
+
+  buildThemeGrid();
+  updateFgDisplay();
+  saveState();
+  startWiggle();
+}
+
+// ═══════════════════════════════════════════════════
+//  WIGGLE ANIMATION
+// ═══════════════════════════════════════════════════
+function startWiggle() {
+  if (wiggleRafId) cancelAnimationFrame(wiggleRafId);
+  function loop(ts) {
+    wiggleRafId = requestAnimationFrame(loop);
+    if (!wiggleEnabled) { jiggle.style.transform = 'translate(0px,0px) rotate(0deg)'; return; }
+    const t = ts * 0.001;
+    const tx = Math.sin(t * 1.6) * 1.8 + Math.sin(t * 3.3) * 0.55;
+    const ty = Math.cos(t * 1.25) * 1.5 + Math.cos(t * 2.7) * 0.48;
+    const ro = Math.sin(t * 0.85) * 0.38 + Math.sin(t * 2.2) * 0.11;
+    const jx = isDrawing ? (Math.random() - 0.5) * 1.5 : 0;
+    const jy = isDrawing ? (Math.random() - 0.5) * 1.5 : 0;
+    jiggle.style.transform = `translate(${(tx+jx).toFixed(3)}px,${(ty+jy).toFixed(3)}px) rotate(${ro.toFixed(4)}deg)`;
+  }
+  wiggleRafId = requestAnimationFrame(loop);
+}
+
+function toggleWiggleMode() {
+  wiggleEnabled = !wiggleEnabled;
+  document.getElementById('wiggle-toggle-btn').textContent = 'WIGGLE:' + (wiggleEnabled ? 'ON' : 'OFF');
+}
+
+// ═══════════════════════════════════════════════════
+//  COLOR
+// ═══════════════════════════════════════════════════
+function updateFgDisplay() {
+  document.getElementById('fg-color').style.background = fgColor;
+  document.getElementById('bg-color-box').style.background = bgColor;
+  document.getElementById('color-display').textContent = 'COLOR: ' + fgColor.toUpperCase();
+}
+function pickPaletteColor(c, el) {
+  fgColor = c;
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active'); updateFgDisplay();
+}
+function openColorPicker(target) {
+  colorPickerTarget = target;
+  const inp = document.getElementById('color-picker-input');
+  inp.value = target === 'fg' ? fgColor : bgColor; inp.click();
+}
+function applyPickedColor() {
+  const v = document.getElementById('color-picker-input').value;
+  if (colorPickerTarget === 'fg') fgColor = v; else bgColor = v;
+  updateFgDisplay();
+}
+
+// ═══════════════════════════════════════════════════
+//  TOOLS
+// ═══════════════════════════════════════════════════
+function setTool(t, btn) {
+  tool = t;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  document.getElementById('tool-display').textContent = 'TOOL: ' + t.toUpperCase();
+}
+function updateSize(v) {
+  brushSize = parseInt(v);
+  document.getElementById('size-display').textContent = v;
+}
+
+// ═══════════════════════════════════════════════════
+//  UNDO / REDO
+// ═══════════════════════════════════════════════════
+function saveState() {
+  if (undoStack.length > 40) undoStack.shift();
+  undoStack.push(canvas.toDataURL()); redoStack = [];
+}
+function undo() {
+  if (undoStack.length <= 1) return;
+  redoStack.push(undoStack.pop());
+  const img = new Image(); img.src = undoStack[undoStack.length-1];
+  img.onload = () => ctx.drawImage(img, 0, 0);
+}
+function redo() {
+  if (!redoStack.length) return;
+  const s = redoStack.pop(); undoStack.push(s);
+  const img = new Image(); img.src = s;
+  img.onload = () => ctx.drawImage(img, 0, 0);
+}
+
+// ═══════════════════════════════════════════════════
+//  EVENTS
+// ═══════════════════════════════════════════════════
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches ? e.touches[0] : e;
+  return { x: Math.round(touch.clientX - rect.left), y: Math.round(touch.clientY - rect.top) };
+}
+
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('mousemove', onMove);
+canvas.addEventListener('mouseup', endDraw);
+canvas.addEventListener('mouseleave', endDraw);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e); }, {passive:false});
+canvas.addEventListener('touchmove',  e => { e.preventDefault(); onMove(e);    }, {passive:false});
+canvas.addEventListener('touchend',   endDraw, {passive:false});
+
+function onMove(e) {
+  const pos = getPos(e);
+  document.getElementById('pos-display').textContent = `x:${pos.x} y:${pos.y}`;
+  moveCursorPreview(e);
+  if (isDrawing) draw(e);
+}
+
+function startDraw(e) {
+  isDrawing = true;
+  const pos = getPos(e);
+  lastX = pos.x; lastY = pos.y; wigglePhase = 0;
+
+  if (tool === 'fill')    { floodFill(pos.x, pos.y, fgColor); saveState(); return; }
+  if (tool === 'eyedrop') { pickColor(pos.x, pos.y); return; }
+  if (tool === 'stamp')   { drawStamp(pos.x, pos.y); saveState(); return; }
+  if (tool === 'spray')   { startSpray(pos); return; }
+  if (['line','rect','circle'].includes(tool)) { shapeStart = pos; return; }
+
+  ctx.globalAlpha = brushOpacity;
+  ctx.beginPath(); ctx.arc(pos.x, pos.y, brushSize/2, 0, Math.PI*2);
+  ctx.fillStyle = tool === 'eraser' ? bgColor : fgColor; ctx.fill();
+  ctx.globalAlpha = 1;
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  const pos = getPos(e);
+  if (['line','rect','circle'].includes(tool)) { drawShapePreview(pos); return; }
+  if (tool === 'spray')   { doSpray(pos); lastX=pos.x; lastY=pos.y; return; }
+  if (tool === 'stamp')   { drawStamp(pos.x, pos.y); lastX=pos.x; lastY=pos.y; return; }
+  if (tool === 'eyedrop') { pickColor(pos.x, pos.y); return; }
+
+  ctx.globalAlpha = brushOpacity;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+  if (tool === 'pencil') {
+    ctx.strokeStyle = fgColor; ctx.lineWidth = brushSize * 0.55;
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(pos.x, pos.y); ctx.stroke();
+  } else if (tool === 'brush') {
+    ctx.strokeStyle = fgColor; ctx.lineWidth = brushSize;
+    ctx.shadowBlur = brushSize * 0.35; ctx.shadowColor = fgColor;
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(pos.x, pos.y); ctx.stroke();
+    ctx.shadowBlur = 0;
+  } else if (tool === 'wiggle') {
+    const w = parseInt(document.getElementById('wiggle-slider').value);
+    ctx.strokeStyle = fgColor; ctx.lineWidth = brushSize * 0.45;
+    ctx.beginPath(); ctx.moveTo(lastX, lastY);
+    for (let i = 0; i <= 6; i++) {
+      const t = i/6;
+      const ix = lastX + (pos.x-lastX)*t, iy = lastY + (pos.y-lastY)*t;
+      ctx.lineTo(ix + Math.sin(wigglePhase + i*1.1)*w, iy + Math.cos(wigglePhase + i*0.85)*w);
+    }
+    ctx.stroke(); wigglePhase += 0.55;
+  } else if (tool === 'eraser') {
+    ctx.strokeStyle = bgColor; ctx.lineWidth = brushSize;
+    ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(pos.x, pos.y); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  lastX = pos.x; lastY = pos.y;
+}
+
+function endDraw(e) {
+  if (!isDrawing) return;
+  isDrawing = false;
+  octx.clearRect(0, 0, overlay.width, overlay.height);
+  stopSpray();
+  if (e && ['line','rect','circle'].includes(tool) && shapeStart) {
+    const pos = getPos(e); commitShape(pos); shapeStart = null;
+  }
+  saveState();
+}
+
+// ═══════════════════════════════════════════════════
+//  SHAPES
+// ═══════════════════════════════════════════════════
+function drawShapePreview(pos) {
+  octx.clearRect(0,0,overlay.width,overlay.height);
+  octx.globalAlpha = brushOpacity; octx.strokeStyle = fgColor; octx.lineWidth = brushSize*0.5;
+  _shapeCmd(octx, pos); octx.globalAlpha = 1;
+}
+function commitShape(pos) {
+  ctx.globalAlpha = brushOpacity; ctx.strokeStyle = fgColor; ctx.lineWidth = brushSize*0.5; ctx.lineCap='round';
+  _shapeCmd(ctx, pos); ctx.globalAlpha = 1;
+}
+function _shapeCmd(c, pos) {
+  if (tool==='line') { c.beginPath(); c.moveTo(shapeStart.x,shapeStart.y); c.lineTo(pos.x,pos.y); c.stroke(); }
+  else if (tool==='rect') { c.strokeRect(shapeStart.x,shapeStart.y,pos.x-shapeStart.x,pos.y-shapeStart.y); }
+  else if (tool==='circle') {
+    const cx=(shapeStart.x+pos.x)/2, cy=(shapeStart.y+pos.y)/2;
+    c.beginPath(); c.ellipse(cx,cy,Math.abs(pos.x-shapeStart.x)/2,Math.abs(pos.y-shapeStart.y)/2,0,0,Math.PI*2); c.stroke();
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  SPRAY
+// ═══════════════════════════════════════════════════
+function startSpray(pos) {
+  doSpray(pos);
+  sprayInterval = setInterval(() => { if (isDrawing) doSpray({x:lastX,y:lastY}); }, 28);
+}
+function doSpray(pos) {
+  ctx.globalAlpha = brushOpacity*0.28; ctx.fillStyle = fgColor;
+  for (let i=0; i<Math.floor(brushSize*1.6); i++) {
+    const a=Math.random()*Math.PI*2, r=Math.random()*brushSize;
+    ctx.fillRect(pos.x+Math.cos(a)*r, pos.y+Math.sin(a)*r, 1.5, 1.5);
+  }
+  ctx.globalAlpha = 1;
+}
+function stopSpray() { if (sprayInterval) { clearInterval(sprayInterval); sprayInterval=null; } }
+
+// ═══════════════════════════════════════════════════
+//  FLOOD FILL
+// ═══════════════════════════════════════════════════
+function floodFill(sx, sy, fillColor) {
+  const id = ctx.getImageData(0,0,canvas.width,canvas.height);
+  const d = id.data;
+  const i0 = (sy*canvas.width+sx)*4;
+  const [tr,tg,tb,ta] = [d[i0],d[i0+1],d[i0+2],d[i0+3]];
+  const fc = hexToRgb(fillColor); if (!fc) return;
+  if (fc.r===tr&&fc.g===tg&&fc.b===tb) return;
+  const stack=[[sx,sy]], vis=new Uint8Array(canvas.width*canvas.height);
+  const match=i=>Math.abs(d[i]-tr)<28&&Math.abs(d[i+1]-tg)<28&&Math.abs(d[i+2]-tb)<28&&Math.abs(d[i+3]-ta)<28;
+  while (stack.length) {
+    const [x,y]=stack.pop();
+    if (x<0||x>=canvas.width||y<0||y>=canvas.height) continue;
+    const i=(y*canvas.width+x)*4;
+    if (vis[y*canvas.width+x]||!match(i)) continue;
+    vis[y*canvas.width+x]=1;
+    d[i]=fc.r;d[i+1]=fc.g;d[i+2]=fc.b;d[i+3]=255;
+    stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);
+  }
+  ctx.putImageData(id,0,0);
+}
+function hexToRgb(hex) {
+  const r=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return r?{r:parseInt(r[1],16),g:parseInt(r[2],16),b:parseInt(r[3],16)}:null;
+}
+
+// ═══════════════════════════════════════════════════
+//  EYEDROPPER / STAMP
+// ═══════════════════════════════════════════════════
+function pickColor(x, y) {
+  const p = ctx.getImageData(x,y,1,1).data;
+  fgColor = '#'+[p[0],p[1],p[2]].map(v=>v.toString(16).padStart(2,'0')).join('');
+  updateFgDisplay();
+}
+function drawStamp(x, y) {
+  ctx.font = `${brushSize*2}px serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.globalAlpha=brushOpacity; ctx.fillText(STAMPS[stampIndex],x,y); ctx.globalAlpha=1;
+}
+
+// ═══════════════════════════════════════════════════
+//  TRANSFORMS
+// ═══════════════════════════════════════════════════
+function flipH() {
+  saveState();
+  const t=document.createElement('canvas'); t.width=canvas.width; t.height=canvas.height;
+  const tc=t.getContext('2d'); tc.translate(canvas.width,0); tc.scale(-1,1); tc.drawImage(canvas,0,0);
+  ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(t,0,0); saveState();
+}
+function flipV() {
+  saveState();
+  const t=document.createElement('canvas'); t.width=canvas.width; t.height=canvas.height;
+  const tc=t.getContext('2d'); tc.translate(0,canvas.height); tc.scale(1,-1); tc.drawImage(canvas,0,0);
+  ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(t,0,0); saveState();
+}
+function clearCanvas() {
+  saveState(); ctx.fillStyle=bgColor; ctx.fillRect(0,0,canvas.width,canvas.height); saveState();
+}
+
+// ═══════════════════════════════════════════════════
+//  SAVE / DOWNLOAD
+// ═══════════════════════════════════════════════════
+function openSavePopup() { document.getElementById('save-popup').style.display='block'; }
+
+function doSave(fmt) {
+  document.getElementById('save-ext').textContent = '.' + fmt;
+  const name = document.getElementById('save-filename').value.trim() || 'banana-paint';
+  const mimeMap = {png:'image/png', jpeg:'image/jpeg', webp:'image/webp'};
+  const quality = fmt==='jpeg'?0.92:fmt==='webp'?0.90:1.0;
+  const comp = document.createElement('canvas');
+  comp.width=canvas.width; comp.height=canvas.height;
+  const cc=comp.getContext('2d');
+  cc.fillStyle=bgColor; cc.fillRect(0,0,comp.width,comp.height);
+  cc.drawImage(canvas,0,0);
+  comp.toBlob(blob=>{
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=`${name}.${fmt}`; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),2000);
+    closePopup('save-popup'); flashSaveBtn(); showToast('✓ SAVED TO DOWNLOADS!');
+  }, mimeMap[fmt], quality);
+}
+
+function copyToClipboard() {
+  canvas.toBlob(async blob=>{
+    try {
+      await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      closePopup('save-popup'); showToast('✓ COPIED TO CLIPBOARD!');
+    } catch(e) { alert('Clipboard write failed. Try PNG download.'); }
+  });
+}
+
+function flashSaveBtn() {
+  const btn=document.getElementById('save-btn');
+  btn.classList.remove('flash'); void btn.offsetWidth; btn.classList.add('flash');
+  setTimeout(()=>btn.classList.remove('flash'),500);
+}
+function showToast(msg) {
+  const t=document.getElementById('dl-toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ═══════════════════════════════════════════════════
+//  FILE / CANVAS
+// ═══════════════════════════════════════════════════
+function showNew() { document.getElementById('new-popup').style.display='block'; }
+function createNewCanvas() {
+  const w=parseInt(document.getElementById('new-w').value);
+  const h=parseInt(document.getElementById('new-h').value);
+  const bg=document.getElementById('new-bg').value;
+  canvas.width=w; canvas.height=h; overlay.width=w; overlay.height=h;
+  ctx.fillStyle=bg; ctx.fillRect(0,0,w,h);
+  bgColor=bg==='white'?'#ffffff':bg;
+  document.getElementById('canvas-size-display').textContent=`${w} × ${h}`;
+  undoStack=[]; redoStack=[]; saveState(); closePopup('new-popup');
+}
+function closePopup(id) { document.getElementById(id).style.display='none'; }
+
+// ═══════════════════════════════════════════════════
+//  CURSOR PREVIEW
+// ═══════════════════════════════════════════════════
+const cursorEl = document.getElementById('cursor-preview');
+function moveCursorPreview(e) {
+  if (['fill','eyedrop','stamp'].includes(tool)) { cursorEl.style.display='none'; return; }
+  cursorEl.style.display='block';
+  cursorEl.style.left=e.clientX+'px'; cursorEl.style.top=e.clientY+'px';
+  cursorEl.style.width=brushSize+'px'; cursorEl.style.height=brushSize+'px';
+  cursorEl.style.background=tool==='eraser'?'rgba(255,255,255,0.4)':fgColor+'55';
+}
+canvas.addEventListener('mouseleave',()=>cursorEl.style.display='none');
+canvas.addEventListener('mouseenter',()=>cursorEl.style.display='block');
+
+// ═══════════════════════════════════════════════════
+//  KEYBOARD
+// ═══════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.target.tagName==='INPUT'||e.target.tagName==='SELECT') return;
+  const map={p:'pencil',b:'brush',w:'wiggle',s:'spray',e:'eraser',f:'fill',d:'eyedrop',l:'line',r:'rect',c:'circle'};
+  if (map[e.key]) setTool(map[e.key], document.getElementById('btn-'+map[e.key]));
+  if (e.ctrlKey&&e.key==='z') { e.preventDefault(); undo(); }
+  if (e.ctrlKey&&e.key==='y') { e.preventDefault(); redo(); }
+  if (e.ctrlKey&&e.key==='s') { e.preventDefault(); openSavePopup(); }
+  if (e.key==='[') { brushSize=Math.max(1,brushSize-2); document.getElementById('size-slider').value=brushSize; document.getElementById('size-display').textContent=brushSize; }
+  if (e.key===']') { brushSize=Math.min(80,brushSize+2); document.getElementById('size-slider').value=brushSize; document.getElementById('size-display').textContent=brushSize; }
+});
+
+// ═══════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
